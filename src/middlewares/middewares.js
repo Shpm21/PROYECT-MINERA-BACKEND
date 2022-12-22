@@ -1,4 +1,5 @@
 import dotenv from 'dotenv'
+import jwt from 'jsonwebtoken'
 dotenv.config()
 
 const isRutValid = (rut) => {
@@ -13,6 +14,10 @@ export const validateToken = (req, res, next) => {
     const token =
       authorization.split(' ').length == 2 ? authorization.split(' ')[1] : null
     if (!token) return res.status(401).json({ message: 'No token provided' })
+    const decoded = jwt.verify(token, process.env.SECRET_KEY)
+    if (!decoded)
+      return res.status(401).json({ message: 'Invalid token provided' })
+    req.user = decoded
     next()
   } catch (error) {
     return res.status(401).json({ message: error.message })
